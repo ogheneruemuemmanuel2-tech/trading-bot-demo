@@ -1,17 +1,21 @@
 import time
-import requests
 from keep_alive import keep_alive
+from mexc_api import get_futures_symbols
 
 keep_alive()
 
-print("Trading bot started...")
+print("MEXC Futures New Coin Bot Started")
 
-def get_price():
-    url = "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT"
-    data = requests.get(url).json()
-    return float(data["price"])
+known_symbols = []
 
 while True:
-    price = get_price()
-    print("BTC Price:", price)
+    symbols = get_futures_symbols()
+
+    for s in symbols:
+        symbol = s["symbol"]
+
+        if symbol not in known_symbols:
+            print("NEW FUTURES COIN FOUND:", symbol)
+            known_symbols.append(symbol)
+
     time.sleep(60)
