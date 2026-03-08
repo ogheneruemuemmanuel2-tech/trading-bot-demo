@@ -1,5 +1,5 @@
 requests
+flask
 pandas
 numpy
-flask
-python-binance
+websocket-client
