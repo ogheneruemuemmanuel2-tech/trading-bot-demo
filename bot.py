@@ -24,6 +24,13 @@ while True:
         price = float(get_price(symbol))
 
         if check_momentum(symbol, price):
-            print("PUMP DETECTED:", symbol, price)
+
+    print("PUMP DETECTED:", symbol)
+
+    leverage = auto_leverage(change)
+
+    print("DEMO TRADE OPENED")
+    print("Symbol:", symbol)
+    print("Leverage:", leverage)
 
     time.sleep(60)
