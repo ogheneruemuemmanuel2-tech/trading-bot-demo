@@ -1,9 +1,9 @@
-def auto_leverage(price_change):
+def auto_leverage(change):
 
-    if price_change < 2:
+    if change < 2:
         return 15
 
-    elif price_change < 5:
+    elif change < 5:
         return 10
 
     else:
