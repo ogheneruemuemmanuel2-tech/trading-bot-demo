@@ -45,14 +45,14 @@ while True:
                 print("PUMP DETECTED")
                 print("Symbol:", symbol)
                 print("Price:", price)
-                print("Change:", round(change,2), "%")
+                print("Change:", round(change, 2), "%")
                 print("Leverage:", leverage)
                 print("DEMO TRADE OPENED")
                 print("---------------")
 
-        time.sleep(60)
+        time.sleep(10)
 
     except Exception as e:
 
         print("ERROR:", e)
-        time.sleep(60)
+        time.sleep(10)
