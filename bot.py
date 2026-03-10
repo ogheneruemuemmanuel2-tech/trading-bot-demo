@@ -1,90 +1,108 @@
 import time
-from keep_alive import keep_alive
-from mexc_api import get_futures_symbols, get_price
-from strategy import check_momentum
-from risk_manager import auto_leverage
+from announcement_scanner import scanner_loop
+from mexc_api import get_price
+from strategy import detect_pump
+from risk_manager import choose_risk
 
-keep_alive()
 
-print("MEXC Futures Demo Bot Running")
+# Demo trade storage
+trade = {
+    "active": False,
+    "entry_price": 0,
+    "amount": 0,
+    "leverage": 0,
+    "tp": 0,
+    "sl": 0
+}
 
-known_symbols = []
-price_history = {}
-open_trades = {}
 
-TAKE_PROFIT = 5
-STOP_LOSS = -3
+def open_demo_short(symbol, price, risk):
 
-while True:
+    trade["active"] = True
+    trade["entry_price"] = price
+    trade["amount"] = risk["amount"]
+    trade["leverage"] = risk["leverage"]
 
-    try:
+    # Take profit calculation
+    trade["tp"] = price * (1 - (risk["tp"] / 100))
 
-        symbols = get_futures_symbols()
+    # Stop loss
+    trade["sl"] = price * 1.15
 
-        for s in symbols:
+    print("🚨 DEMO SHORT OPENED")
+    print("Symbol:", symbol)
+    print("Entry:", price)
+    print("Leverage:", trade["leverage"])
+    print("Amount: $", trade["amount"])
+    print("Take Profit:", trade["tp"])
+    print("Stop Loss:", trade["sl"])
 
-            symbol = s["symbol"]
 
-            if symbol not in known_symbols:
-                print("NEW COIN FOUND:", symbol)
-                known_symbols.append(symbol)
+def track_trade(symbol):
 
-            price = float(get_price(symbol))
+    while trade["active"]:
 
-            # TRACK OPEN TRADES
-            if symbol in open_trades:
+        current_price = get_price(symbol)
 
-                entry = open_trades[symbol]["entry"]
+        entry = trade["entry_price"]
 
-                profit = (price - entry) / entry * 100
+        profit_percent = ((entry - current_price) / entry) * 100 * trade["leverage"]
 
-                print("TRADE UPDATE")
-                print("Symbol:", symbol)
-                print("Entry:", entry)
-                print("Current:", price)
-                print("Profit:", round(profit,2), "%")
+        print("\n📊 TRADE TRACKER")
+        print("Entry Price:", entry)
+        print("Current Price:", current_price)
+        print("Profit %:", round(profit_percent,2))
+        print("TP:", trade["tp"])
+        print("SL:", trade["sl"])
 
-                if profit >= TAKE_PROFIT:
-                    print("TAKE PROFIT HIT")
-                    del open_trades[symbol]
+        # Take Profit
+        if current_price <= trade["tp"]:
+            print("\n✅ TAKE PROFIT HIT")
+            trade["active"] = False
+            break
 
-                elif profit <= STOP_LOSS:
-                    print("STOP LOSS HIT")
-                    del open_trades[symbol]
+        # Stop Loss
+        if current_price >= trade["sl"]:
+            print("\n❌ STOP LOSS HIT")
+            trade["active"] = False
+            break
 
-                continue
+        time.sleep(2)
 
-            if symbol not in price_history:
-                price_history[symbol] = price
-                continue
 
-            old_price = price_history[symbol]
+def run_bot():
 
-            change = (price - old_price) / old_price * 100
+    print("🚀 LISTING SNIPER BOT STARTED")
 
-            price_history[symbol] = price
+    listing = scanner_loop()
 
-            if check_momentum(symbol, price):
+    print("\nNew listing detected:")
+    print(listing)
 
-                leverage = auto_leverage(change)
+    symbol = "NEWCOIN_USDT"
 
-                print("---------------")
-                print("PUMP DETECTED")
-                print("Symbol:", symbol)
-                print("Entry Price:", price)
-                print("Change:", round(change,2), "%")
-                print("Leverage:", leverage)
-                print("DEMO TRADE OPENED")
-                print("---------------")
+    risk = choose_risk("normal")
 
-                open_trades[symbol] = {
-                    "entry": price,
-                    "leverage": leverage
-                }
+    print("\nWaiting for pump...")
 
-        time.sleep(10)
+    while True:
 
-    except Exception as e:
+        price = get_price(symbol)
 
-        print("ERROR:", e)
-        time.sleep(10)
+        print("Price:", price)
+
+        # Example pump detection
+        if price > 1.2:
+
+            print("\n🔥 PUMP DETECTED")
+
+            open_demo_short(symbol, price, risk)
+
+            track_trade(symbol)
+
+            break
+
+        time.sleep(2)
+
+
+run_bot()
