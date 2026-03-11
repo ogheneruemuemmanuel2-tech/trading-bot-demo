@@ -7,7 +7,6 @@ from risk_manager import choose_risk
 from listing_timer import extract_listing_time, start_countdown
 
 
-# Demo trade storage
 trade = {
     "active": False,
     "entry_price": 0,
@@ -70,20 +69,16 @@ def run_bot():
 
     print("🚀 LISTING SNIPER BOT STARTED")
 
-    # Step 1: Scan MEXC announcements
-    listing = scanner_loop()
+    listing, symbol = scanner_loop()
 
-    print("\n📢 New listing detected:")
+    print("\n📢 New listing detected")
     print(listing)
+    print("Symbol:", symbol)
 
-    # Step 2: Extract listing time
     listing_time = extract_listing_time(listing)
 
     if listing_time:
         start_countdown(listing_time)
-
-    # Example symbol (later we will auto detect it)
-    symbol = "NEWCOIN_USDT"
 
     risk = choose_risk("normal")
 
@@ -95,7 +90,6 @@ def run_bot():
 
         print("Price:", price)
 
-        # Example pump detection
         if price > 1.2:
 
             print("\n🔥 PUMP DETECTED")
