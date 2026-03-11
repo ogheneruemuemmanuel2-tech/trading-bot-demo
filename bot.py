@@ -5,6 +5,7 @@ from mexc_api import get_price
 from strategy import detect_top
 from risk_manager import choose_risk, analyze_coin_strength
 from listing_timer import extract_listing_time, start_countdown
+from telegram_bot import send_message
 
 
 trade = {
@@ -27,13 +28,19 @@ def open_demo_short(symbol, price, risk):
     trade["tp"] = price * (1 - (risk["tp"] / 100))
     trade["sl"] = price * 1.15
 
-    print("\n🚨 DEMO SHORT OPENED")
-    print("Symbol:", symbol)
-    print("Entry Price:", price)
-    print("Leverage:", trade["leverage"])
-    print("Amount: $", trade["amount"])
-    print("Take Profit:", trade["tp"])
-    print("Stop Loss:", trade["sl"])
+    message = f"""
+🚨 DEMO SHORT OPENED
+
+Coin: {symbol}
+Entry: {price}
+Leverage: {trade['leverage']}x
+Amount: ${trade['amount']}
+TP: {trade['tp']}
+SL: {trade['sl']}
+"""
+
+    print(message)
+    send_message(message)
 
 
 def track_trade(symbol):
@@ -46,20 +53,17 @@ def track_trade(symbol):
 
         profit_percent = ((entry - current_price) / entry) * 100 * trade["leverage"]
 
-        print("\n📊 TRADE TRACKER")
-        print("Entry Price:", entry)
-        print("Current Price:", current_price)
-        print("Profit %:", round(profit_percent, 2))
-        print("TP:", trade["tp"])
-        print("SL:", trade["sl"])
+        print("Profit:", round(profit_percent, 2), "%")
 
         if current_price <= trade["tp"]:
-            print("\n✅ TAKE PROFIT HIT")
+
+            send_message("✅ TAKE PROFIT HIT")
             trade["active"] = False
             break
 
         if current_price >= trade["sl"]:
-            print("\n❌ STOP LOSS HIT")
+
+            send_message("❌ STOP LOSS HIT")
             trade["active"] = False
             break
 
@@ -68,29 +72,26 @@ def track_trade(symbol):
 
 def run_bot():
 
-    print("🚀 LISTING SNIPER BOT STARTED")
+    send_message("🤖 LISTING BOT STARTED")
 
     listing, symbol = scanner_loop()
 
-    print("\n📢 New listing detected")
-    print(listing)
-    print("Symbol:", symbol)
+    send_message(f"🚀 NEW LISTING DETECTED\n{symbol}")
 
     level = analyze_coin_strength(listing)
 
-    print("\nCoin strength:", level)
-
     risk = choose_risk(level)
 
-    print("Trade amount:", risk["amount"])
-    print("Leverage:", risk["leverage"])
+    send_message(f"""
+Coin strength: {level}
+Trade amount: ${risk['amount']}
+Leverage: {risk['leverage']}x
+""")
 
     listing_time = extract_listing_time(listing)
 
     if listing_time:
         start_countdown(listing_time)
-
-    print("\n👀 Watching for TOP...")
 
     while True:
 
@@ -98,7 +99,7 @@ def run_bot():
 
             price = get_price(symbol)
 
-            print("\n🔥 TOP DETECTED - OPENING SHORT")
+            send_message("🔥 TOP DETECTED")
 
             open_demo_short(symbol, price, risk)
 
