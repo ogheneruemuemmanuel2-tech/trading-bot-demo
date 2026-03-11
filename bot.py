@@ -41,6 +41,7 @@ def track_trade(symbol):
     while trade["active"]:
 
         current_price = get_price(symbol)
+
         entry = trade["entry_price"]
 
         profit_percent = ((entry - current_price) / entry) * 100 * trade["leverage"]
@@ -48,7 +49,7 @@ def track_trade(symbol):
         print("\n📊 TRADE TRACKER")
         print("Entry Price:", entry)
         print("Current Price:", current_price)
-        print("Profit %:", round(profit_percent, 2))
+        print("Profit %:", round(profit_percent,2))
         print("TP:", trade["tp"])
         print("SL:", trade["sl"])
 
@@ -82,17 +83,15 @@ def run_bot():
 
     risk = choose_risk("normal")
 
-    print("\nWaiting for pump...")
+    print("\nWatching pump...")
 
     while True:
 
-        price = get_price(symbol)
+        if detect_pump(symbol):
 
-        print("Price:", price)
+            price = get_price(symbol)
 
-        if price > 1.2:
-
-            print("\n🔥 PUMP DETECTED")
+            print("\n🔥 STRONG PUMP DETECTED")
 
             open_demo_short(symbol, price, risk)
 
@@ -100,7 +99,7 @@ def run_bot():
 
             break
 
-        time.sleep(2)
+        time.sleep(1)
 
 
 run_bot()
