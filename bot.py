@@ -1,5 +1,5 @@
 import time
-
+from token_analyzer import analyze_dump_risk
 from multi_exchange_scanner import scanner_loop
 from mexc_api import get_price
 from strategy import detect_top
