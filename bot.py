@@ -3,7 +3,7 @@ import time
 from announcement_scanner import scanner_loop
 from mexc_api import get_price
 from strategy import detect_pump
-from risk_manager import choose_risk
+from risk_manager import choose_risk, analyze_coin_strength
 from listing_timer import extract_listing_time, start_countdown
 
 
@@ -49,7 +49,7 @@ def track_trade(symbol):
         print("\n📊 TRADE TRACKER")
         print("Entry Price:", entry)
         print("Current Price:", current_price)
-        print("Profit %:", round(profit_percent,2))
+        print("Profit %:", round(profit_percent, 2))
         print("TP:", trade["tp"])
         print("SL:", trade["sl"])
 
@@ -76,12 +76,20 @@ def run_bot():
     print(listing)
     print("Symbol:", symbol)
 
+    # Analyze coin strength
+    level = analyze_coin_strength(listing)
+
+    print("\nCoin strength:", level)
+
+    risk = choose_risk(level)
+
+    print("Trade size:", risk["amount"])
+    print("Leverage:", risk["leverage"])
+
     listing_time = extract_listing_time(listing)
 
     if listing_time:
         start_countdown(listing_time)
-
-    risk = choose_risk("normal")
 
     print("\nWatching pump...")
 
