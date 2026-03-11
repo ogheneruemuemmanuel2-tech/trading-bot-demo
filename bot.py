@@ -1,8 +1,10 @@
-    import time
+import time
+
 from announcement_scanner import scanner_loop
 from mexc_api import get_price
 from strategy import detect_pump
 from risk_manager import choose_risk
+from listing_timer import extract_listing_time, start_countdown
 
 
 # Demo trade storage
@@ -23,15 +25,12 @@ def open_demo_short(symbol, price, risk):
     trade["amount"] = risk["amount"]
     trade["leverage"] = risk["leverage"]
 
-    # Take profit calculation
     trade["tp"] = price * (1 - (risk["tp"] / 100))
-
-    # Stop loss
     trade["sl"] = price * 1.15
 
-    print("🚨 DEMO SHORT OPENED")
+    print("\n🚨 DEMO SHORT OPENED")
     print("Symbol:", symbol)
-    print("Entry:", price)
+    print("Entry Price:", price)
     print("Leverage:", trade["leverage"])
     print("Amount: $", trade["amount"])
     print("Take Profit:", trade["tp"])
@@ -43,7 +42,6 @@ def track_trade(symbol):
     while trade["active"]:
 
         current_price = get_price(symbol)
-
         entry = trade["entry_price"]
 
         profit_percent = ((entry - current_price) / entry) * 100 * trade["leverage"]
@@ -51,17 +49,15 @@ def track_trade(symbol):
         print("\n📊 TRADE TRACKER")
         print("Entry Price:", entry)
         print("Current Price:", current_price)
-        print("Profit %:", round(profit_percent,2))
+        print("Profit %:", round(profit_percent, 2))
         print("TP:", trade["tp"])
         print("SL:", trade["sl"])
 
-        # Take Profit
         if current_price <= trade["tp"]:
             print("\n✅ TAKE PROFIT HIT")
             trade["active"] = False
             break
 
-        # Stop Loss
         if current_price >= trade["sl"]:
             print("\n❌ STOP LOSS HIT")
             trade["active"] = False
@@ -74,11 +70,19 @@ def run_bot():
 
     print("🚀 LISTING SNIPER BOT STARTED")
 
+    # Step 1: Scan MEXC announcements
     listing = scanner_loop()
 
-    print("\nNew listing detected:")
+    print("\n📢 New listing detected:")
     print(listing)
 
+    # Step 2: Extract listing time
+    listing_time = extract_listing_time(listing)
+
+    if listing_time:
+        start_countdown(listing_time)
+
+    # Example symbol (later we will auto detect it)
     symbol = "NEWCOIN_USDT"
 
     risk = choose_risk("normal")
