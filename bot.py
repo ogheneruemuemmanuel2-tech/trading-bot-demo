@@ -56,7 +56,11 @@ Coin: {symbol}
 
     level = analyze_coin_strength(symbol)
 
-    risk = choose_risk(level)
+dump_risk = analyze_dump_risk(symbol)
+
+print("Dump risk:", dump_risk)
+
+risk = choose_risk(level)
 
     send_message(f"""
 Coin strength: {level}
