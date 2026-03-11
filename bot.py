@@ -2,7 +2,7 @@ import time
 
 from announcement_scanner import scanner_loop
 from mexc_api import get_price
-from strategy import detect_pump
+from strategy import detect_top
 from risk_manager import choose_risk, analyze_coin_strength
 from listing_timer import extract_listing_time, start_countdown
 
@@ -63,7 +63,7 @@ def track_trade(symbol):
             trade["active"] = False
             break
 
-        time.sleep(2)
+        time.sleep(1)
 
 
 def run_bot():
@@ -76,14 +76,13 @@ def run_bot():
     print(listing)
     print("Symbol:", symbol)
 
-    # Analyze coin strength
     level = analyze_coin_strength(listing)
 
     print("\nCoin strength:", level)
 
     risk = choose_risk(level)
 
-    print("Trade size:", risk["amount"])
+    print("Trade amount:", risk["amount"])
     print("Leverage:", risk["leverage"])
 
     listing_time = extract_listing_time(listing)
@@ -91,15 +90,15 @@ def run_bot():
     if listing_time:
         start_countdown(listing_time)
 
-    print("\nWatching pump...")
+    print("\n👀 Watching for TOP...")
 
     while True:
 
-        if detect_pump(symbol):
+        if detect_top(symbol):
 
             price = get_price(symbol)
 
-            print("\n🔥 STRONG PUMP DETECTED")
+            print("\n🔥 TOP DETECTED - OPENING SHORT")
 
             open_demo_short(symbol, price, risk)
 
@@ -107,7 +106,7 @@ def run_bot():
 
             break
 
-        time.sleep(1)
+        time.sleep(0.5)
 
 
 run_bot()
