@@ -3,3 +3,5 @@ flask
 pandas
 numpy
 websocket-client
+beautifulsoup4
+lxml
