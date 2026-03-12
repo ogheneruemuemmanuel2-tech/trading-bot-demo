@@ -5,7 +5,7 @@ from mexc_api import get_price
 from strategy import detect_top
 from risk_manager import choose_risk, analyze_coin_strength
 from telegram_bot import send_message
-
+print("BOT STARTED SUCCESSFULLY")
 
 trade = {
     "active": False,
